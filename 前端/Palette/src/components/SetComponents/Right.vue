@@ -1,0 +1,13 @@
+<template>
+	<div style="width: 100%;margin-right: 5%;">
+		
+		<router-view name="set_router"> </router-view>
+	</div>
+</template>
+
+<script>
+</script>
+
+<style>
+
+</style>
