@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.UserNoticeMapper">
+
+    <select id="getNoticeByToken" parameterType="Long" resultType="com.outstandingteam.palette.controller.util.ret.SimpleNotice">
+        SELECT `notice`.notice_id,`notice`.notice_title,`notice`.notice_content,`notice`.publish_time
+        FROM `token`,`user_notice`,`notice`
+        WHERE `token`.token = #{token}
+          AND `token`.create_time &lt;= SYSDATE()
+          AND `token`.deadline_time &gt;= SYSDATE()
+          AND `token`.user_id = `user_notice`.user_id
+          AND `user_notice`.notice_id = `notice`.notice_id
+    </select>
+</mapper>

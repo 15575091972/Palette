@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.MysteryBoxMapper">
+    <resultMap id="simpleMysteryBox" type="com.outstandingteam.palette.controller.util.ret.SimpleMysteryBox">
+        <id column="box_id" property="boxId"/>
+        <result column="box_name" property="boxName"/>
+        <result column="box_price" property="boxPrice"/>
+        <collection property="goods" ofType="string">
+            <result column="art_name"/>
+        </collection>
+    </resultMap>
+    
+    <select id="getSimpleById" parameterType="long" resultMap="simpleMysteryBox">
+        SELECT `mystery_box`.box_id,`mystery_box`.box_name,`mystery_box`.box_price,`art`.art_name
+        FROM `mystery_box`,`mystery_box_goods`,`goods`,`art`
+        WHERE `mystery_box`.box_id = `mystery_box_goods`.box_id
+          AND `mystery_box_goods`.goods_id = `goods`.goods_id
+          AND `art`.art_id = `goods`.art_id
+          AND `mystery_box`.box_id = #{boxId}
+    </select>
+</mapper>

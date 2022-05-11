@@ -1,0 +1,50 @@
+# 应用名称
+spring:
+  application:
+    name: palette
+  # 数据库驱动：
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 数据源名称
+    name: palette_db
+    # 数据库连接地址
+    url: jdbc:mysql://localhost:3306/palette_db?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
+    # 数据库用户名&密码：
+    username: root
+    password: root
+  resources:
+    static-locations: file:D://Workspace//IDEA//picture
+  mvc:
+    static-path-pattern: /**
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  servlet:
+    multipart:
+      enabled: true #是否启用http上传处理
+      max-request-size: 100MB #最大请求文件的大小
+      max-file-size: 20MB #设置单个文件最大长度
+      file-size-threshold: 20MB #当文件达到多少时进行磁盘写入
+
+  axios:
+    defaults:
+      withCredentials: true
+
+
+servlet:
+  address: 0.0.0.0
+
+
+# 逻辑删除
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: deleted # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+  mapper-locations: classpath:/com/outstandingteam/palette/mapper/xml/**.xml
+  type-aliases-package: com.outstandingteam.palette.mybatis.entity
+
+
+
+

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.GoodsRentMapper">
+    <resultMap id="simpleRentMap" type="com.outstandingteam.palette.controller.util.ret.SimpleRent">
+        <id column="rent_id" property="rentId"/>
+        <result column="charter_money" property="charter"/>
+        <result column="create_time" property="time"/>
+        <result column="rent_start_time" property="startTime"/>
+        <result column="rent_end_time" property="endTime"/>
+        <association property="leaseholder" column="seller_id"
+                     select="com.outstandingteam.palette.mapper.UserMapper.getOtherUser"/>
+        <association property="tenant" column="buyer_id"
+                     select="com.outstandingteam.palette.mapper.UserMapper.getOtherUser"/>
+    </resultMap>
+
+
+    <select id="getOrder" parameterType="Long" resultMap="simpleRentMap">
+        SELECT `goods_rent`.leaseholder_id,`goods_rent`.tenant_id,
+               `goods_rent`.charter_money,`goods_rent`.create_time,
+               `goods_rent`.rent_start_time,`goods_rent`.rent_end_time,
+               `goods_rent`.rent_id
+        FROM `goods_rent`,`token`
+        WHERE (`token`.user_id = `goods_rent`.leaseholder_id
+            OR `token`.user_id = `goods_rent`.tenant_id)
+          AND `token`.token = #{token}
+          AND `token`.create_time &lt;= SYSDATE()
+          AND `token`.deadline_time &gt;= SYSDATE()
+    </select>
+
+    <select id="getRentsByArtId" parameterType="Long" resultMap="simpleRentMap">
+        SELECT `goods_rent`.leaseholder_id,`goods_rent`.tenant_id,
+               `goods_rent`.charter_money,`goods_rent`.create_time,
+               `goods_rent`.rent_start_time,`goods_rent`.rent_end_time,
+               `goods_rent`.rent_id
+        FROM `goods_rent`,`goods`,`art`
+        WHERE `goods_rent`.goods_id = `goods`.goods_id
+          AND `goods`.art_id = `art`.art_id
+          AND `art`.art_id = #{artId}
+    </select>
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.GoodsMapper">
+
+    <resultMap id="simpleGoodsMap" type="com.outstandingteam.palette.controller.util.ret.SimpleGoods">
+        <id column="goods_id" property="goodsId"/>
+        <result column="trade_mode" property="tradeMode"/>
+        <result column="goods_quantity" property="goodsQuantity"/>
+        <result column="rent_start_time" property="rentStartTime"/>
+        <result column="rent_end_time" property="rentEndTime"/>
+        <result column="trade_fun" property="tradeFun"/>
+        <result column="resale_price" property="resalePrice"/>
+        <association property="simpleArt" column="art_id"
+                     select="com.outstandingteam.palette.mapper.ArtMapper.getSimpleArtById"/>
+        <association property="goodsSeller" column="goods_seller_id"
+                     select="com.outstandingteam.palette.mapper.UserMapper.getOtherUser"/>
+    </resultMap>
+
+
+    <select id="getArtGoods" parameterType="Long" resultMap="simpleGoodsMap">
+        SELECT `goods`.goods_id,`goods`.trade_mode,`goods`.goods_quantity,`goods`.goods_seller_id,
+               `goods`.rent_start_time,`goods`.rent_end_time,`goods`.trade_fun,
+               `goods`.resale_price,`goods`.art_id
+        FROM `goods`
+        WHERE `goods`.art_id = #{artId}
+        GROUP BY `goods`.goods_id
+    </select>
+
+    <select id="getMarkGoods" parameterType="map" resultMap="simpleGoodsMap">
+        SELECT `goods`.goods_id,`goods`.trade_mode,`goods`.goods_quantity,
+        `goods`.goods_seller_id,`goods`.rent_start_time,`goods`.rent_end_time,
+        `goods`.trade_fun,`goods`.resale_price,`goods`.art_id
+        FROM `goods`,`art`
+        WHERE `goods`.art_id = `art`.art_id
+        AND `goods`.trade_fun = 1
+        AND `goods`.selled = false
+        <if test="topPrice != null">
+            AND `goods`.resale_price &lt;= #{topPrice}
+        </if>
+        <if test="lowPrice != null">
+            AND `goods`.resale_price &gt;= #{lowPrice}
+        </if>
+        <if test="type != null and type != 0">
+            AND `art`.art_type = #{type}
+        </if>
+
+    </select>
+
+    <select id="getArtFuzzy" parameterType="string" resultMap="simpleGoodsMap">
+        SELECT `goods`.goods_id,`goods`.trade_mode,`goods`.goods_quantity,
+               `goods`.goods_seller_id,`goods`.rent_start_time,`goods`.rent_end_time,
+               `goods`.trade_fun,`goods`.resale_price,`goods`.art_id
+        FROM `goods`,`art`,`art_label`
+        WHERE `goods`.art_id = `art`.art_id
+          AND `goods`.selled = false
+          AND `art`.art_id = `art_label`.art_id
+          AND (`art`.art_name like concat('%', #{fuzzyStatement}, '%')
+            OR `art`.art_introduction like concat('%', #{fuzzyStatement}, '%')
+            OR `art`.art_author like concat('%', #{fuzzyStatement}, '%')
+            OR `art_label`.art_label like concat('%', #{fuzzyStatement}, '%'))
+    </select>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.GoodsTradeMapper">
+    <resultMap id="simpleTradeMap" type="com.outstandingteam.palette.controller.util.ret.SimpleTrade">
+        <id property="tradeId" column="trade_id"/>
+        <result column="coin" property="coin"/>
+        <result column="create_time" property="time"/>
+        <association property="seller" column="seller_id"
+                     select="com.outstandingteam.palette.mapper.UserMapper.getOtherUser"/>
+        <association property="buyer" column="buyer_id"
+                     select="com.outstandingteam.palette.mapper.UserMapper.getOtherUser"/>
+    </resultMap>
+
+
+    <select id="getOrder" parameterType="Long" resultMap="simpleTradeMap">
+        SELECT `goods_trade`.trade_id,`goods_trade`.seller_id,`goods_trade`.buyer_id,`goods_trade`.coin,`goods_trade`.create_time
+        FROM `goods_trade`,`token`
+        WHERE (`token`.user_id = `goods_trade`.seller_id
+            OR `token`.user_id = `goods_trade`.buyer_id)
+            AND  `token`.token = #{token}
+            AND `token`.create_time &lt;= SYSDATE()
+            AND `token`.deadline_time &gt;= SYSDATE()
+    </select>
+
+
+
+
+    <select id="getTradesByArtId" parameterType="Long" resultMap="simpleTradeMap">
+        SELECT `goods_trade`.trade_id,`goods_trade`.seller_id,`goods_trade`.buyer_id,`goods_trade`.coin,`goods_trade`.create_time
+        FROM `goods_trade`,`goods`,`art`
+        WHERE `goods_trade`.goods_id = `goods`.goods_id
+          AND `goods`.art_id = `art`.art_id
+          AND `art`.art_id = #{artId}
+    </select>
+</mapper>

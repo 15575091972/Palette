@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.UserFollowMapper">
+
+    <resultMap id="simpleUserMap" type="com.outstandingteam.palette.controller.util.ret.SimpleUser">
+        <id column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_account" property="userAccount"/>
+        <association property="userHeadImage" column="user_head_image_id"
+                     select="com.outstandingteam.palette.mapper.FileMapper.getFilePathById"/>
+    </resultMap>
+    
+    <select id="getFollow" parameterType="Long" resultMap="simpleUserMap">
+        SELECT `user`.user_id,`user`.user_name,`user`.user_account,`user`.user_head_image_id
+        FROM `user_follow`,`user`
+        WHERE `user_follow`.follower_id = `user`.user_id
+          AND `user`.user_id = #{userId}
+    </select>
+</mapper>

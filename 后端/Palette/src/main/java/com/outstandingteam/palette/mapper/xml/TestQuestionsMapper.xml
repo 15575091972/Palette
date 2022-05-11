@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.TestQuestionsMapper">
+
+    <select id="getSimpleById" parameterType="Long"
+            resultType="com.outstandingteam.palette.controller.util.ret.SimpleProblem">
+        SELECT problem_id,problem_title,disturb_a,disturb_b,disturb_c,answer AS disturb_d
+        FROM `test_questions`
+        WHERE problem_id = #{problemId}
+    </select>
+
+</mapper>

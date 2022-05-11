@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.AuctionAddpriceMapper">
+    <resultMap id="simpleAddPrice" type="com.outstandingteam.palette.controller.util.ret.SimpleAddPrice">
+        <result column="bid_price" property="bidPrice"/>
+        <result column="create_time" property="time"/>
+        <association property="user" column="user_id"
+                     select="com.outstandingteam.palette.mapper.UserMapper.getOtherUser"/>
+    </resultMap>
+
+    <select id="getSimpleByAuctionId" parameterType="Long" resultMap="simpleAddPrice">
+        SELECT bid_price,user_id,create_time
+        FROM `auction_addprice`
+        WHERE aution_id = #{auctionId}
+    </select>
+</mapper>

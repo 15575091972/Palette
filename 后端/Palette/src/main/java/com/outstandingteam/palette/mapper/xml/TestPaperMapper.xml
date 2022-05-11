@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.TestPaperMapper">
+
+    <resultMap id="detailTestPaper" type="com.outstandingteam.palette.controller.util.ret.DetailTestPaper">
+        <id column="test_paper_id" property="testPaperId"/>
+        <result column="test_paper_name" property="testPaperName"/>
+        <result column="test_paper_introduction" property="testPaperIntroduction"/>
+        <result column="test_paper_start_time" property="testPaperStartTime"/>
+        <result column="test_paper_end_time" property="testPaperEndTime"/>
+        <result column="had_advance" property="hadAdvance"/>
+        <result column="questions_num" property="questionsNum"/>
+        <result column="max_results" property="maxResults"/>
+        <association property="problems" column="problem_id"
+                     select="com.outstandingteam.palette.mapper.TestQuestionsMapper.getSimpleById"/>
+    </resultMap>
+
+    <select id="getTestPaper" parameterType="Long" resultMap="detailTestPaper">
+        SELECT `test_paper`.test_paper_id,`test_paper`.test_paper_name,`test_paper`.test_paper_introduction,
+               `test_paper`.test_paper_start_time,`test_paper`.test_paper_end_time,`test_paper`.had_advance,
+               `test_paper`.questions_num,`test_paper`.max_results,`test_paper_problem`.problem_id
+        FROM `test_paper`,`test_paper_problem`
+        WHERE `test_paper`.test_paper_id = #{testPaperId}
+    </select>
+</mapper>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.LocationMapper">
+
+
+
+    <select id="getHomeLocation" parameterType="Long"
+            resultType="com.outstandingteam.palette.controller.util.ret.DetailLocation">
+        SELECT location_id,`name`,phone,province,city,region,detailed
+        FROM `location`
+        WHERE user_id IN (
+            SELECT user_id
+            FROM `token`
+            WHERE token = #{token}
+              AND `token`.create_time &lt;= SYSDATE()
+              AND `token`.deadline_time &gt;= SYSDATE())
+    </select>
+</mapper>

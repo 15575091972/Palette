@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.ArtCommentMapper">
+
+    <resultMap id="commentMap" type="com.outstandingteam.palette.controller.util.ret.DetailComment">
+        <id column="comment_id" property="commentId"/>
+        <result property="commentContent" column="comment_content"/>
+        <result column="comment_reply" property="commentReply"/>
+        <result column="comment_like" property="commentLike"/>
+        <result column="create_time" property="createTime"/>
+        <result column="is_like" property="isLike"/>
+        <association property="commnetator" column="commnetator_id"
+                     select="com.outstandingteam.palette.mapper.UserMapper.getOtherUser"/>
+    </resultMap>
+
+    <select id="getCommentsById" resultMap="commentMap" parameterType="map">
+        SELECT
+                `comment`.comment_id,`comment`.comment_content,`comment`.commnetator_id,`comment`.comment_reply,
+               `comment`.comment_like,`comment`.create_time
+        <if test="userId != null">
+            ,(SELECT COUNT(*)
+            FROM `comment_like`
+            WHERE `comment_like`.like_user_id = #{userId}
+            AND `comment_like`.comment_id = `comment`.comment_id) AS is_like
+        </if>
+        FROM `comment`,`art_comment`
+        WHERE `art_comment`.art_id = #{artId}
+        AND `comment`.comment_id = `art_comment`.comment_id
+        ORDER BY `comment`.create_time
+    </select>
+</mapper>

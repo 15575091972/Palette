@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.ShoppingCarMapper">
+
+    <resultMap id="simpleArtMap" type="com.outstandingteam.palette.controller.util.ret.SimpleArt">
+        <id property="artId" column="art_id"/>
+        <result property="artName" column="art_name"/>
+        <result property="artIntroduction" column="art_introduction"/>
+        <result property="showImage" column="file_path"/>
+        <result property="artAuthor" column="art_author"/>
+        <collection property="showFile" column="art_id"
+                    select="com.outstandingteam.palette.mapper.ArtShowFileMapper.getArtOneShowFileById"/>
+    </resultMap>
+
+    <resultMap id="simpleGoodsMap" type="com.outstandingteam.palette.controller.util.ret.SimpleGoods">
+        <id column="goods_id" property="goodsId"/>
+        <result column="trade_mode" property="tradeMode"/>
+        <result column="goods_quantity" property="goodsQuantity"/>
+        <result column="rent_start_time" property="rentStartTime"/>
+        <result column="rent_end_time" property="rentEndTime"/>
+        <result column="trade_fun" property="tradeFun"/>
+        <result column="resale_price" property="resalePrice"/>
+        <association property="simpleArt" column="art_id"
+                     select="com.outstandingteam.palette.mapper.ArtMapper.getSimpleArtById"/>
+        <association property="goodsSeller" column="goods_seller_id"
+                     select="com.outstandingteam.palette.mapper.UserMapper.getOtherUser"/>
+    </resultMap>
+
+
+    <select id="getShoppingCar" resultMap="simpleGoodsMap" parameterType="map">
+        SELECT `goods`.goods_id,`goods`.trade_mode,`goods`.goods_quantity,`goods`.goods_seller_id,
+                `goods`.rent_start_time,`goods`.rent_end_time,`goods`.trade_fun,
+                `goods`.resale_price,`goods`.art_id
+        FROM `art`,`file`,`shopping_car`,`goods`
+        WHERE `art`.art_file = `file`.file_id
+        <if test="type != null and type != 0">
+            AND `art`.art_type = #{type}
+        </if>
+        AND `shopping_car`.user_id = #{userId}
+        AND `goods`.goods_id = `shopping_car`.goods_id
+        AND `goods`.art_id = `art`.art_id
+        AND `shopping_car`.deleted = 0
+        ORDER BY `shopping_car`.create_time
+        <if test="sort == 1">ASC</if>
+        <if test="sort == 2">DESC</if>
+    </select>
+</mapper>

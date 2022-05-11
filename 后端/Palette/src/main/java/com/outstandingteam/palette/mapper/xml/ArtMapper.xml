@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.ArtMapper">
+
+    <resultMap id="simpleArtMap" type="com.outstandingteam.palette.controller.util.ret.SimpleArt">
+        <id property="artId" column="art_id"/>
+        <result property="artName" column="art_name"/>
+        <result property="artIntroduction" column="art_introduction"/>
+        <result property="showImage" column="file_path"/>
+        <result property="artAuthor" column="art_author"/>
+        <collection property="showFile" column="art_id"
+                    select="com.outstandingteam.palette.mapper.ArtShowFileMapper.getArtOneShowFileById"/>
+    </resultMap>
+
+
+    <select id="getSimpleArtById" parameterType="long" resultMap="simpleArtMap">
+        SELECT `art`.art_id, `art`.art_name, `art`.art_introduction, `file`.file_path,`art`.art_author
+        FROM `art`,
+             `file`
+        WHERE `art`.art_file = `file`.file_id
+          AND `art`.art_id = #{artId}
+    </select>
+
+    <select id="getHotRecommendArt" parameterType="map" resultMap="simpleArtMap">
+        SELECT `art`.art_id,`art`.art_name,`art`.art_introduction,`file`.file_path,`art`.art_author
+        FROM `art`,`file`,`art_label`
+        WHERE `art`.art_file = `file`.file_id
+        <if test="type != null and type != 0">
+            AND `art`.art_type = #{type}
+        </if>
+            AND `art`.art_id IN (
+                SELECT `user_art_view`.art_id
+                FROM `user_art_view`
+                GROUP BY `user_art_view`.art_id
+                ORDER BY SUM(`user_art_view`.view_num) DESC)
+        GROUP BY `art`.art_id
+        ORDER BY COUNT(*)
+        LIMIT #{num};
+    </select>
+
+    <select id="getSomeArt" resultMap="simpleArtMap">
+        SELECT `art`.art_id, `art`.art_name, `art`.art_introduction, `file`.file_path,`art`.art_author
+        FROM `art`,
+             `file`
+        WHERE `art`.art_file = `file`.file_id
+          AND `art`.art_type = #{type} LIMIT #{num};
+    </select>
+
+    <select id="getAllArt" parameterType="int" resultMap="simpleArtMap">
+        SELECT `art`.art_id,`art`.art_name,`art`.art_introduction,`file`.file_path,`art`.art_author
+        FROM `art`,`file`
+        WHERE `art`.art_file = `file`.file_id
+        <if test="type != null and type != 0">
+            AND `art`.art_type = #{type}
+        </if>
+        LIMIT #{start},#{limit}
+    </select>
+
+    <resultMap id="detailsArtMap" type="com.outstandingteam.palette.controller.util.ret.DetailsArt">
+        <id column="art_id" property="artId"/>
+        <result column="art_name" property="artName"/>
+        <result column="art_type" property="artType"/>
+        <result column="art_introduction" property="artIntroduction"/>
+        <result column="file_path" property="showImage"/>
+        <result column="art_author" property="artAuthor"/>
+
+        <collection property="showFile" column="art_id"
+                    select="com.outstandingteam.palette.mapper.ArtShowFileMapper.getArtAllShowFileById"/>
+        <collection property="labels" ofType="string" javaType="list">
+            <result column="art_label"/>
+        </collection>
+    </resultMap>
+
+    <select id="getDetailsById" resultMap="detailsArtMap" parameterType="Long">
+        SELECT `art`.art_id,
+               `art`.art_name,
+               `art`.art_type,
+               `art`.art_introduction,
+               `art_label`.art_label,`art`.art_author,
+               `file`.file_path
+        FROM `art`,
+             `file`,
+             `art_label`
+        WHERE `art`.art_file = `file`.file_id
+          AND `art_label`.art_id = `art`.art_id
+          AND `art`.art_id = #{artId}
+    </select>
+
+    <select id="getArtRecommend" parameterType="map" resultMap="simpleArtMap">
+        SELECT `art`.art_id, `art`.art_name, `art`.art_introduction, `file`.file_path,`art`.art_author
+        FROM `art`,
+             `file`,
+             `art_label`
+        WHERE `art`.art_file = `file`.file_id
+          AND `art`.art_id = `art_label`.art_id
+          AND `art_label`.art_label IN (
+            SELECT `art_label`.art_label
+            FROM `art`,
+                 `art_label`
+            WHERE `art`.art_id = `art_label`.art_id
+              AND `art`.art_id = #{artId})
+        GROUP BY `art`.art_id
+            LIMIT #{num};
+    </select>
+
+    <select id="getArtByToken" parameterType="map"
+            resultMap="simpleArtMap">
+        SELECT `art`.art_id,`art`.art_name,`art`.art_introduction,`file`.file_path,`art`.art_author
+        FROM `art`,`file`
+        WHERE `art`.art_file = `file`.file_id
+        <if test="ownerAllArt != null and ownerAllArt.size() > 0">
+            AND `art`.art_token in
+            <foreach item="item" collection="ownerAllArt" separator="," open="(" close=")" index="index">
+                #{item}
+            </foreach>
+        </if>
+        <if test="type != null and type != 0">
+            AND `art`.art_type = #{type}
+        </if>
+        ORDER BY `art`.create_time
+        <if test="sort == 1">
+            ASC
+        </if>
+        <if test="sort == 2">
+            DESC
+        </if>
+    </select>
+
+</mapper>

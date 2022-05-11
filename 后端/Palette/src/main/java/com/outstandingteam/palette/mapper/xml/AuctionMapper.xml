@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.AuctionMapper">
+
+    <resultMap id="simpleAuctionMap" type="com.outstandingteam.palette.controller.util.ret.SimpleAuction">
+        <id column="auction_id" property="auctionId"/>
+        <result property="auctionRoomId" column="auction_room_id"/>
+        <result property="topPrice" column="top_price"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <association property="art" column="art_id"
+                     select="com.outstandingteam.palette.mapper.ArtMapper.getSimpleArtById"/>
+    </resultMap>
+    <select id="getSimpleAuctionById" parameterType="Long" resultMap="simpleAuctionMap">
+        SELECT `auction`.auction_id,
+               `auction`.auction_room_id,
+               `auction`.top_price,
+               `auction`.start_time,
+               `auction`.end_time,
+               `art`.art_id
+        FROM `auction`,
+             `goods`,
+             `art`
+        WHERE `auction`.auction_id = #{auctionId}
+          AND `auction`.auction_goods_id = `goods`.goods_id
+          AND `goods`.art_id = `art`.art_id
+    </select>
+
+    <select id="getAuctions" parameterType="map" resultMap="simpleAuctionMap">
+        SELECT `auction`.auction_id,`auction`.auction_room_id,`auction`.top_price,
+        `auction`.start_time,`auction`.end_time,`art`.art_id
+        FROM `auction`,`goods`,`art`
+        WHERE `auction`.auction_goods_id = `goods`.goods_id
+        AND `goods`.art_id = `art`.art_id
+        <if test="auctionStartTime != null">
+            AND `auction`.start_time &lt;= #{auctionStartTime}
+        </if>
+        <if test="auctionEndTime != null">
+            AND `auction`.end_time &gt;= #{auctionEndTime}
+        </if>
+        <if test="topPrice != null">
+            AND `auction`.top_price &gt;= #{topPrice}
+        </if>
+        <if test="lowPrice != null">
+            AND `auction`.top_price &lt;= #{lowPrice}
+        </if>
+        <if test="type != null">
+            AND `art`.art_type = #{type}
+        </if>
+    </select>
+
+    <select id="getAuctionBySearch" parameterType="string" resultMap="simpleAuctionMap">
+        SELECT `auction`.auction_id,
+               `auction`.auction_room_id,
+               `auction`.top_price,
+               `auction`.start_time,
+               `auction`.end_time,
+               `art`.art_id
+        FROM `auction`,
+             `goods`,
+             `art`
+        WHERE `auction`.auction_goods_id = `goods`.goods_id
+          AND `goods`.art_id = `art`.art_id
+          AND (`auction`.auction_room_id = #{search}
+            OR `art`.art_name LIKE concat(concat('%', #{search,jdbcType=VARCHAR}), '%')
+            OR `art`.art_introduction LIKE concat(concat('%', #{search,jdbcType=VARCHAR}), '%'))
+
+    </select>
+
+    <resultMap id="detailAuction" type="com.outstandingteam.palette.controller.util.ret.DetailAuction">
+        <id column="auction_id" property="auctionId"/>
+        <result column="auction_room_id" property="auctionRoomId"/>
+        <result column="base_price" property="basePrice"/>
+        <result column="min_addprice" property="minAddprice"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="top_price" property="topPrice"/>
+        <result column="have_stay" property="haveStay"/>
+        <association property="art" column="art_id"
+                     select="com.outstandingteam.palette.mapper.ArtMapper.getSimpleById"/>
+        <collection property="addPrices" column="auction_id"
+                    select="com.outstandingteam.palette.mapper.AuctionAddpriceMapper.getSimpleByAuctionId"/>
+    </resultMap>
+
+    <select id="getAuctionDetails" parameterType="Long" resultMap="detailAuction">
+        SELECT `auction`.auction_id,
+               `auction`.auction_room_id,
+               `auction`.base_price,
+               `auction`.min_addprice,
+               `auction`.start_time,
+               `auction`.end_time,
+               `auction`.top_price,
+               `auction`.have_stay,
+               `goods`.art_id
+        FROM `auction`,
+             `goods`
+        WHERE `auction`.auction_goods_id = `goods`.goods_id
+          AND `auction`.auction_id = #{auctionId}
+    </select>
+</mapper>

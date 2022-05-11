@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.outstandingteam.palette.mapper.ReportMapper">
+
+    <resultMap id="detailReport" type="com.outstandingteam.palette.controller.util.ret.DetailReport">
+        <id column="report_id" property="reportId"/>
+        <result column="report_object_type" property="reportObjectType"/>
+        <result column="report_object" property="reportObject"/>
+        <result column="report_content" property="reportContent"/>
+        <result column="report_result" property="reportResult"/>
+        <collection property="evidence" ofType="string" javaType="list">
+            <result column="file_path"/>
+        </collection>
+    </resultMap>
+
+    <select id="getReport" parameterType="map" resultMap="detailReport">
+        SELECT `report`.report_id,`report`.report_object_type,`report`.report_object,
+               `report`.report_content,`report`.report_result,
+               `file`.file_path
+        FROM `report`,`report_evidence`,`file`
+        WHERE `report`.report_id = `report_evidence`.report_id
+        AND `file`.file_id = `report_evidence`.report_evidence_file
+        AND `report`.report_id = #{reportId}
+        AND `report`.reporter = (SELECT user_id
+            FROM token
+            WHERE token = #{token}
+              AND `token`.create_time &lt;= SYSDATE()
+              AND `token`.deadline_time &gt;= SYSDATE())
+    </select>
+</mapper>
